@@ -4,6 +4,7 @@ const uuid = require('uuid')
 const bcrypt = require("bcrypt");
 const { hashPassword } = require("../utils/passwordHasher");
 const { makeToken } = require("../utils/tokenMaker");
+const { sendConfirmationEmail } = require("../utils/emailUtil");
 const registerUser = (user) => {
     return new Promise((resolve, reject) => {
         getUserByEmail(user.email).then((result) => {
@@ -23,7 +24,10 @@ const registerUser = (user) => {
                         confirmationcode : token
     
                     }
+                    
                     registerNewUser(newUser).then((result) => {
+                        //send the email to the client
+                        sendConfirmationEmail(newUser.firstname,newUser.email, newUser.confirmationcode)
                         resolve(result);
                     }).catch((err) => {
                         reject(err);
