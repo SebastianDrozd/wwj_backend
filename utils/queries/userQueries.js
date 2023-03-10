@@ -1,0 +1,6 @@
+const GET_ALL_USERS = "SELECT * FROM user"
+const GET_USER_BY_EMAIL = "SELECT * FROM user WHERE email = ?"
+const GET_USER_BY_USERNAME = "SELECT * FROM user WHERE username = ?"
+const CREATE_NEW_USER = "INSERT INTO user SET ?"
+
+module.exports = {GET_ALL_USERS,GET_USER_BY_EMAIL,CREATE_NEW_USER}
