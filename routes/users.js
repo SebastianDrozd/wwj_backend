@@ -33,6 +33,10 @@ router.get("/confirm/:confirmationToken", (req, res) => {
     })
 })
 
+router.post("/login", (req, res) => {
+    const user = req.body;
+})
+
 
 
 module.exports = router;
