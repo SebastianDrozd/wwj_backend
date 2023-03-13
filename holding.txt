@@ -1,0 +1,39 @@
+const refreshToken = req.body.token;
+    if(refreshToken == null) return res.sendStatus(401);
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+        if(err) return res.sendStatus(403);
+        const accessToken = generateAccessToken({name: user.name});
+        res.json({accessToken: accessToken});
+    })
+
+
+      jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+            if(err) return response.sendStatus(403);
+            const accessToken = jwt.sign({
+                username: user.username,
+                email: user.email
+            }, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '10m'
+            });
+            response.cookie('jwt', refreshToken, { httpOnly: true, 
+                sameSite: 'None', secure: true, 
+                maxAge: 24 * 60 * 60 * 1000 });
+            resolve(new LoginResponse(accessToken, user.username,user.email));
+        })
+
+
+
+          if(user.token) {
+
+       let token = JSON.parse(atob(user.token.split(".")[1]));
+       console.log(token)
+       console.log("this is parsed token", token)
+       console.log(token.exp > Date.now() / 600000)
+       if(token.exp > Date.now() / 600000) {
+          //here the token is valid
+          console.log("token is valid")
+          setLoggedIn(true)
+          return;
+        };
+
+  }

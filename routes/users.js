@@ -1,4 +1,4 @@
-const { registerUser, confirmConfirmationToken } = require('../service/usersService');
+const { registerUser, confirmConfirmationToken, loginUser, refreshToken } = require('../service/usersService');
 
 const router = require('express').Router();
 
@@ -35,6 +35,22 @@ router.get("/confirm/:confirmationToken", (req, res) => {
 
 router.post("/login", (req, res) => {
     const user = req.body;
+    loginUser(user,res).then((result) => {
+        res.send(result);
+    })
+    .catch(err => {
+        res.status(err.statusCode).send(err);
+    })
+})
+
+router.post("/refresh",(req,res) => {
+    refreshToken(req,res).then((result) => {
+        res.send(result);
+    })
+    .catch(err => {
+        res.status(err.statusCode).send(err);
+    })
+    
 })
 
 
