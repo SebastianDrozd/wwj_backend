@@ -1,7 +1,17 @@
-const { registerUser, confirmConfirmationToken, loginUser, refreshToken } = require('../service/usersService');
+const authenticateToken = require('../middleware/jwtMiddleware');
+const { getUserById, getUserByEmail } = require('../repo/usersRepo');
+const { registerUser, confirmConfirmationToken, loginUser, refreshToken, handleRecaptcha } = require('../service/usersService');
 
 const router = require('express').Router();
 
+router.get('/:id',authenticateToken, (req, res) => {
+    console.log("these are params ", req.params)
+    let id = req.params.id;
+    getUserByEmail(id).then((result) => {
+        res.send(result);
+    })
+   
+})
 
 //register a new user
 router.post('/register', (req, res) => {
@@ -36,6 +46,7 @@ router.get("/confirm/:confirmationToken", (req, res) => {
 router.post("/login", (req, res) => {
     const user = req.body;
     loginUser(user,res).then((result) => {
+        console.log("sucessfully logged in")
         res.send(result);
     })
     .catch(err => {
@@ -52,6 +63,23 @@ router.post("/refresh",(req,res) => {
     })
     
 })
+//recaptcha route
+router.post("/recaptcha",(req,res) => {
+    const token = req.body.token;
+    console.log("this is the token ", token)
+    handleRecaptcha(token).then((result) => {
+        res.send(result);
+    })
+    .catch(err => {
+        res.send(err)
+    })
+})
+
+router.post("/logout",(req,res) => {
+    
+})
+
+
 
 
 

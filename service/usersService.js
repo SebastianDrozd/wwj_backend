@@ -1,5 +1,5 @@
 const UserAlreadyExistsError = require("../error/userAlreadyExists");
-const { getUserByEmail, registerNewUser, getUserByConfirmationCode, updateUserStatus, getUserByUsername } = require("../repo/usersRepo")
+const { getUserByEmail, registerNewUser, getUserByConfirmationCode, updateUserStatus, getUserByUsername, saveRefreshToken, getUserRefreshToken, deleteRefreshToken } = require("../repo/usersRepo")
 const uuid = require('uuid')
 const bcrypt = require("bcrypt");
 const { hashPassword } = require("../utils/passwordHasher");
@@ -24,7 +24,9 @@ var fs = require('fs');
 const RefreshTokenBlacklistedError = require("../error/refreshTokenBlacklistedError");
 const RefreshTokenResponse = require("../error/refreshTokenResponse");
 const { createAccessToken } = require("../utils/jwt");
-
+const axios = require("axios");
+const InvalidRecaptchaError = require("../error/ImvalidRecaptchaError");
+const ReCaptchaResponse = require("../response/ReCaptchaResponse");
 
 const registerUser = (user) => {
     return new Promise((resolve, reject) => {
@@ -38,7 +40,6 @@ const registerUser = (user) => {
                     id: id,
                     firstname: user.firstname,
                     lastname: user.lastname,
-                    username: user.username,
                     email: user.email,
                     password: bcrypt.hashSync(user.password, 10),
                     confirmationcode: encodeRegistrationToken(id),
@@ -57,7 +58,6 @@ const registerUser = (user) => {
                     .catch((err) => {
                         reject(new EmailErorr(err));
                     })
-
             }
         }).catch((err) => {
             reject(err);
@@ -112,23 +112,52 @@ const loginUser = (userDto, response) => {
                         }
                         else {
                             if (result) {
-                                let audience = ""
-                                if(dbUser.type == "user"){
-                                    audience = "user"
-                                }
-                                else{
-                                    audience = "business"
-                                }
-
                                 const refreshToken = jwt.sign({
-                                    username: dbUser.username,
-                                }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
-                                response.cookie('jwt', refreshToken, {
-                                    httpOnly: true,
-                                    sameSite: 'None', secure: true,
-                                    maxAge: 24 * 60 * 60 * 1000
-                                });
-                                resolve(new LoginResponse(createAccessToken(dbUser), dbUser.username, dbUser.email,dbUser.type));
+                                    sub: dbUser.id,
+                                }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1m' });
+                                console.log("this is the dbuser id",    dbUser.id)
+                                getUserRefreshToken(dbUser.id).then((result) => {
+                                    if(result.length > 0){
+                                        console.log("refresh token exists")
+                                        deleteRefreshToken(dbUser.id).then((result) => {
+                                            console.log("refresh token deleted")
+                                            saveRefreshToken(refreshToken, dbUser.id).then((result) => {
+                                                console.log("refresh token saved")
+                                                response.cookie('jwt', refreshToken, {
+                                                    httpOnly: true,
+                                                    sameSite: 'None', secure: true,
+                                                    maxAge: 24 * 60 * 60 * 1000
+                                                });
+                                                resolve(new LoginResponse(createAccessToken(dbUser), dbUser.username, dbUser.email, dbUser.type));
+            
+                                            })
+                                                .catch((err) => {
+                                                    console.log("error saving refresh token", err)
+                                                    reject(err)
+                                                })
+                                           
+                                        })
+
+                                    }
+                                    else{
+                                        saveRefreshToken(refreshToken, dbUser.id).then((result) => {
+                                            console.log("refresh token saved")
+                                            response.cookie('jwt', refreshToken, {
+                                                httpOnly: true,
+                                                sameSite: 'None', secure: true,
+                                                maxAge: 24 * 60 * 60 * 1000
+                                            });
+                                            resolve(new LoginResponse(createAccessToken(dbUser), dbUser.username, dbUser.email, dbUser.type));
+        
+                                        })
+                                            .catch((err) => {
+                                                console.log("error saving refresh token", err)
+                                                reject(err)
+                                            })
+                                    }
+                                })
+                               
+
                             }
                             else {
                                 reject(new PasswordMismatchError())
@@ -147,6 +176,53 @@ const loginUser = (userDto, response) => {
 
     })
 
+}
+
+const refreshToken2 = (request, response) => {
+    return new Promise((resolve, reject) => {
+        console.log("refresh token is called", request.cookies)
+        const refreshToken = request.cookies.jwt;
+
+        //when the refresh token is null return the missingerror
+        if (refreshToken == null)
+            reject(new RefreshTokenMissingError());
+        else {
+            jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+                if (err) {
+                    console.log("refresh token is invalid")
+                    reject(new RefreshTokenInvalidError());
+                }
+                else {
+                    //the token is valid lets check if its mathes the database
+                    getUserRefreshToken(user.sub).then((result) => {
+                        if (result.length > 0) {
+                            //token matches in the database
+                            console.log("token matches in the database")
+                            //lets go ahead and create a new refresh token
+                            const refreshedToken = jwt.sign({
+                                sub: user.sub,
+                            }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
+
+                            saveRefreshToken(refreshToken, user.sub).then((result) => {
+                                response.cookie('jwt', refreshedToken, {
+                                    httpOnly: true,
+                                    sameSite: 'None', secure: true,
+                                    maxAge: 24 * 60 * 60 * 1000
+                                });
+                            })
+                            resolve(new RefreshTokenResponse(createAccessToken(dbUser), refreshedToken))
+
+                        }
+                        else {
+                            //token does not match in the database
+                            console.log("token does not match in the database")
+                            reject(new RefreshTokenInvalidError())
+                        }
+                    })
+                }
+            })
+        }
+    })
 }
 
 const refreshToken = (request, response) => {
@@ -169,7 +245,8 @@ const refreshToken = (request, response) => {
 
                 }
                 else {
-                    //if the refresh token is valid, we need to check if it is in the blacklist
+                    //if the refresh token is valid, we need to check if it is in the blacklis
+
                     fs.readFile('./utils/blackList.txt', function (err, data) {
                         if (err) throw err;
                         if (data.toString().includes(refreshToken)) {
@@ -212,4 +289,37 @@ const refreshToken = (request, response) => {
     })
 }
 
-module.exports = { registerUser, confirmConfirmationToken, loginUser, refreshToken }
+const handleRecaptcha = (token) => {
+    return new Promise((resolve, reject) => {
+        const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`;
+        console.log("this is verification url", verificationUrl)
+        console.log("about to send recaptch to google")
+        axios.post(verificationUrl)
+            .then((response) => {
+                resolve(new ReCaptchaResponse(response.data.challenge_ts))
+            })
+            .catch((err) => {
+                console.log(new InvalidRecaptchaError())
+            })
+
+
+    })
+}
+
+const handleLogout = (request, response) => {
+    return new Promise((resolve, reject) => {
+        const refreshToken = request.cookies.jwt;
+        if (refreshToken == null)
+            reject(new RefreshTokenMissingError());
+        else {
+            fs.appendFile('./utils/blackList.txt', refreshToken + '\n', function (err) {
+                if (err) throw err;
+                console.log('Saved!');
+            });
+            response.clearCookie('jwt', { path: '/' });
+            resolve(new LogoutResponse());
+        }
+    })
+}
+
+module.exports = { handleRecaptcha, registerUser, confirmConfirmationToken, loginUser, refreshToken }

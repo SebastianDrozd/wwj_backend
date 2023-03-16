@@ -2,7 +2,7 @@ const pool = require('../utils/databaseConnection');
 const ConnectionError = require('../error/connectionError');
 const DatabaseError = require('../error/databaseError');
 const UserCreatedResponse = require('../response/userCreatedResponse');
-const { GET_USER_BY_EMAIL, CREATE_NEW_USER, GET_USER_BY_CONFIRMATION_CODE, UPDATE_USER_STATUS, DELETE_USER_CONFIRMATION_CODE, GET_ALL_USERS, GET_USER_BY_USERNAME } = require('../utils/queries/userQueries');
+const { GET_USER_BY_EMAIL, CREATE_NEW_USER, GET_USER_BY_CONFIRMATION_CODE, UPDATE_USER_STATUS, DELETE_USER_CONFIRMATION_CODE, GET_ALL_USERS, GET_USER_BY_USERNAME, SET_FRESH_TOKEN, GET_USER_REFRESH_TOKEN, DELETE_REFRESH_TOKEN, GET_USER_BY_ID } = require('../utils/queries/userQueries');
 const CodeConfirmedResponse = require('../response/codeConfirmedResponse');
 
 const getUserByEmail = (email) => {
@@ -46,6 +46,48 @@ const getUserByUsername = (username) => {
         })
     })
 }
+const getUserById = (id) => {
+    return new Promise((resolve,reject) => {
+        pool.getConnection((err,connection) => {
+            if(err){
+                reject(new ConnectionError());
+            }
+            else{
+                
+                connection.query(GET_USER_BY_ID,id,(err,result) => {
+                    connection.release();
+                    if(err){
+                        reject(new DatabaseError(err.code));
+                    }
+                    else{
+                        resolve(result);
+                    }
+                })
+            }
+        })
+    })
+}
+
+const getUserRefreshToken = (id) => {
+    return new Promise((resolve,reject) => {
+        pool.getConnection((err,connection) => {
+            if(err){
+                reject(new ConnectionError());
+            }
+            else{
+                connection.query(GET_USER_REFRESH_TOKEN,id,(err,result) => {
+                    connection.release();
+                    if(err){
+                        reject(new DatabaseError(err.code));
+                    }
+                    else{
+                        resolve(result);
+                    }
+                })
+            }
+        })
+    })
+}
 
 
 
@@ -68,6 +110,33 @@ const registerNewUser = (user) => {
 
         });
     });
+}
+
+const saveRefreshToken = (token,id) => {
+    return new Promise((resolve,reject) => {
+        const tokenObject = {
+            userid: id,
+            refreshToken: token
+        }
+        console.log("this is the token object: ",tokenObject)
+        pool.getConnection((err,connection) => {
+            if(err){
+                reject(new ConnectionError());
+            }
+            else{
+                
+                connection.query(SET_FRESH_TOKEN,tokenObject,(err,result) => {
+                    connection.release();
+                    if(err){
+                        reject(new DatabaseError(err.code));
+                    }
+                    else{
+                        resolve(result);
+                    }
+                })
+            }
+        })
+    })
 }
 
 const getUserByConfirmationCode = (code) => {
@@ -119,4 +188,27 @@ const updateUserStatus = (id) => {
     })
 }
 
-module.exports = { registerNewUser, getUserByEmail,getUserByConfirmationCode,getUserByUsername,updateUserStatus }
+const deleteRefreshToken = (id) => {
+    return new Promise((resolve,reject) => {
+        console.log("this is id in repo")
+        pool.getConnection((err,connection) => {
+            if(err){
+                reject(new ConnectionError());
+            }
+            else{
+                connection.query(DELETE_REFRESH_TOKEN,id,(err,result) => {
+                    connection.release();
+                    if(err){
+                        reject(new DatabaseError(err.code));
+                    }
+                    else{
+                        resolve(result);
+                    }
+                })
+            }
+        })
+    })
+}
+
+
+module.exports = {getUserById,saveRefreshToken, registerNewUser, getUserByEmail,getUserByConfirmationCode,getUserByUsername,updateUserStatus,getUserRefreshToken,deleteRefreshToken }
