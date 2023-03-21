@@ -1,5 +1,5 @@
 const authenticateToken = require('../middleware/jwtMiddleware');
-const { getUserById, getUserByEmail } = require('../repo/usersRepo');
+const { getUserById, getUserByEmail, getUserCompleteProfile } = require('../repo/usersRepo');
 const { registerUser, confirmConfirmationToken, loginUser, refreshToken, handleRecaptcha } = require('../service/usersService');
 
 const router = require('express').Router();
@@ -7,7 +7,10 @@ const router = require('express').Router();
 router.get('/:id',authenticateToken, (req, res) => {
     console.log("these are params ", req.params)
     let id = req.params.id;
-    getUserByEmail(id).then((result) => {
+    /* getUserByEmail(id).then((result) => {
+        res.send(result);
+    }) */
+    getUserCompleteProfile(id).then((result) => {
         res.send(result);
     })
    

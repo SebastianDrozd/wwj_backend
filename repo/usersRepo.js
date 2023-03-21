@@ -2,7 +2,7 @@ const pool = require('../utils/databaseConnection');
 const ConnectionError = require('../error/connectionError');
 const DatabaseError = require('../error/databaseError');
 const UserCreatedResponse = require('../response/userCreatedResponse');
-const { GET_USER_BY_EMAIL, CREATE_NEW_USER, GET_USER_BY_CONFIRMATION_CODE, UPDATE_USER_STATUS, DELETE_USER_CONFIRMATION_CODE, GET_ALL_USERS, GET_USER_BY_USERNAME, SET_FRESH_TOKEN, GET_USER_REFRESH_TOKEN, DELETE_REFRESH_TOKEN, GET_USER_BY_ID, SET_ACCOUNT_SETUP_TO_TRUE } = require('../utils/queries/userQueries');
+const { GET_USER_BY_EMAIL, CREATE_NEW_USER, GET_USER_BY_CONFIRMATION_CODE, UPDATE_USER_STATUS, DELETE_USER_CONFIRMATION_CODE, GET_ALL_USERS, GET_USER_BY_USERNAME, SET_FRESH_TOKEN, GET_USER_REFRESH_TOKEN, DELETE_REFRESH_TOKEN, GET_USER_BY_ID, SET_ACCOUNT_SETUP_TO_TRUE, GET_COMPLETE_PROFILE } = require('../utils/queries/userQueries');
 const CodeConfirmedResponse = require('../response/codeConfirmedResponse');
 
 const getUserByEmail = (email) => {
@@ -55,6 +55,27 @@ const getUserById = (id) => {
             else{
                 
                 connection.query(GET_USER_BY_ID,id,(err,result) => {
+                    connection.release();
+                    if(err){
+                        reject(new DatabaseError(err.code));
+                    }
+                    else{
+                        resolve(result);
+                    }
+                })
+            }
+        })
+    })
+}
+const getUserCompleteProfile = (id) => {
+    return new Promise((resolve,reject) => {
+        pool.getConnection((err,connection) => {
+            if(err){
+                reject(new ConnectionError());
+            }
+            else{
+                
+                connection.query(GET_COMPLETE_PROFILE,id,(err,result) => {
                     connection.release();
                     if(err){
                         reject(new DatabaseError(err.code));
@@ -235,4 +256,4 @@ const updateAccountSetup = (id) => {
 }
 
 
-module.exports = {getUserById,saveRefreshToken, registerNewUser, getUserByEmail,getUserByConfirmationCode,getUserByUsername,updateUserStatus,getUserRefreshToken,deleteRefreshToken,updateAccountSetup }
+module.exports = {getUserById,saveRefreshToken, registerNewUser, getUserByEmail,getUserByConfirmationCode,getUserByUsername,updateUserStatus,getUserRefreshToken,deleteRefreshToken,updateAccountSetup,getUserCompleteProfile }

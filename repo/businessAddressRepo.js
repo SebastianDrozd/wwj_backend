@@ -1,7 +1,7 @@
 const ConnectionError = require("../error/connectionError")
 const DatabaseError = require("../error/databaseError")
 const pool = require("../utils/databaseConnection")
-const { CREATE_NEW_ADDRESS } = require("../utils/queries/addressQueries")
+const { CREATE_NEW_ADDRESS } = require("../utils/queries/businessAddressQueries")
 
 const createNewAddress = (address) => {
     console.log("this is address repo in createNewAddress: ",address)
