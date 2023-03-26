@@ -197,18 +197,18 @@ const loginUser = (userDto, response) => {
                 if (result) {
                   const refreshToken = jwt.sign(
                     {
-                      sub: dbUser.id,
+                      sub: dbUser.user_id,
                     },
                     process.env.REFRESH_TOKEN_SECRET,
                     { expiresIn: "1m" }
                   );
-                  console.log("this is the dbuser id", dbUser.id);
-                  getUserRefreshToken(dbUser.id).then((result) => {
+                  console.log("this is the dbuser id", dbUser.user_id);
+                  getUserRefreshToken(dbUser.user_id).then((result) => {
                     if (result.length > 0) {
                       console.log("refresh token exists");
-                      deleteRefreshToken(dbUser.id).then((result) => {
+                      deleteRefreshToken(dbUser.user_id).then((result) => {
                         console.log("refresh token deleted");
-                        saveRefreshToken(refreshToken, dbUser.id)
+                        saveRefreshToken(refreshToken, dbUser.user_id)
                           .then((result) => {
                             console.log("refresh token saved");
                             response.cookie("jwt", refreshToken, {

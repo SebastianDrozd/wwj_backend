@@ -10,7 +10,6 @@ const createNewJobPostAddress = (jobPostAddress) => {
             if(err)
                 reject(new ConnectionError());
             else{
-                CREATE
                 connection.query(CREATE_NEW_JOB_ADDRESS,jobPostAddress,(err,result) => {
                     connection.release();
                     if(err)

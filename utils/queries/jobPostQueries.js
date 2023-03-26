@@ -1,3 +1,3 @@
 const CREATE_NEW_JOB_POST = "INSERT into jobpost Set ?";
-
-module.exports = {CREATE_NEW_JOB_POST}
+const GET_JOB_POSTS_LIKE = "SELECT job_title FROM jobpost WHERE job_title LIKE ?";
+module.exports = {CREATE_NEW_JOB_POST,GET_JOB_POSTS_LIKE}

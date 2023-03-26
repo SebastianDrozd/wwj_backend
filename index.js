@@ -11,6 +11,7 @@ app.use(cors({ origin: "http://localhost:3000", credentials: true }))
 app.use("/api/v1/users", require('./routes/users'));
 app.use("/api/v1/jobs", require('./routes/jobPostings'));
 app.use("/api/v1/business",  require('./routes/business'));
+app.use("/api/v1/location", require('./routes/locationFinder'));
 
 app.listen(process.env.PORT || 3000, () => {
   console.log('Server is running on port:',process.env.PORT || 3000);
