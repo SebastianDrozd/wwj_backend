@@ -25,4 +25,27 @@ const createNewJobApplication =  (jobApplication) => {
     })
 }
 
-module.exports = {createNewJobApplication}
+const getUserJobApplicationsById = (userId) => {
+    return new Promise((resolve,reject) => {
+        pool.getConnection((err,connection) => {
+            if(err){
+                console.log(err)
+                reject(err)
+            }
+            else{
+                connection.query(GET_USER_JOB_APPLICATIONS,userId,(err,result) => {
+                    if(err){
+                        console.log(err)
+                        reject(err)
+                    }
+                    else{
+                        console.log("got user job applications")
+                        resolve(result)
+                    }
+                })
+            }
+        })
+    })
+}
+
+module.exports = {createNewJobApplication,getUserJobApplicationsById}
