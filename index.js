@@ -14,6 +14,7 @@ app.use("/api/v1/business",  require('./routes/business'));
 app.use("/api/v1/location", require('./routes/locationFinder'));
 app.use("/api/v1/regUsers", require('./routes/regUsers'));
 app.use("/api/v1/jobApplications", require('./routes/jobApplications'));
+app.use("/api/v1/resumes", require('./routes/resume'));
 app.listen(process.env.PORT || 3000, () => {
   console.log('Server is running on port:',process.env.PORT || 3000);
 });

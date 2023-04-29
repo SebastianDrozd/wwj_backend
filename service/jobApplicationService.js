@@ -1,4 +1,4 @@
-const { createNewJobApplication, getUserJobApplicationsById } = require("../repo/jobApplicationRepo")
+const { createNewJobApplication, getUserJobApplicationsById, getBusinessJobApplications } = require("../repo/jobApplicationRepo")
 const uuid = require("uuid");
 
 const saveJobApplication = async (req,res) => {
@@ -26,4 +26,18 @@ const getUserJobApplications = async (req,res) => {
         res.status(500).json(err)
     }
 }
-module.exports = {saveJobApplication,getUserJobApplications}
+
+const handleGetBusinessJobApplications = async(req,res) => {
+    const businessId = req.params.id;
+    console.log("this is id", businessId)
+    try{
+       const response = await getBusinessJobApplications(businessId);
+         res.status(200).json(response);
+        
+
+    }catch(err){
+        console.log(err)
+        res.status(500).json(err)
+    }
+}
+module.exports = {saveJobApplication,getUserJobApplications, handleGetBusinessJobApplications}
