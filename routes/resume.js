@@ -23,4 +23,12 @@ router.post('/',  upload.single('avatar'), (req, res) => {
     
 });
 
+//@desc     Download a candidates resume
+//@route    GET /api/v1/resumes/:id/download
+//@access   Private
+
+router.get('/:id/download', (req, res) => {
+    //will download a user's resume
+});
+
 module.exports = router;

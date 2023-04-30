@@ -4,6 +4,9 @@ const {
   CREATE_NEW_JOB_APPLICATION,
   GET_USER_JOB_APPLICATIONS,
   GET_BUSINESS_JOB_APPLICATIONS,
+  GET_JOB_APPLICATION_DETAILS,
+  UPDATE_JOB_APPLICATION_VIEWED_STATUS,
+  UPDATE_JOB_APPLICATION_REJECTED_STATUS,
 } = require("../utils/queries/jobApplicationQueries");
 
 const createNewJobApplication = (jobApplication) => {
@@ -72,4 +75,56 @@ const getBusinessJobApplications = (businessId) => {
   })
 };
 
-module.exports = { createNewJobApplication, getUserJobApplicationsById,getBusinessJobApplications };
+const getJobApplicationDetails = (jobApplicationId) => new Promise((resolve, reject) => {
+  pool.getConnection((err, connection) => {
+    if (err) {
+      return reject(new ConnectionError());
+    }
+    else{
+      connection.query(GET_JOB_APPLICATION_DETAILS, jobApplicationId, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    }
+  });
+});
+
+const updateJobApplicationViewedStatus = (jobApplicationId) => new Promise((resolve, reject) => {
+  pool.getConnection((err, connection) => {
+    console.log("repo got hit")
+    if (err) {
+      return reject(new ConnectionError());
+    }
+    else{
+      connection.query(UPDATE_JOB_APPLICATION_VIEWED_STATUS, jobApplicationId, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve("Changed job application status to viewed");
+        }
+      });
+    }
+  });
+});
+const updateJobApplicationRejectedStatus = (jobApplicationId) => new Promise((resolve, reject) => {
+    pool.getConnection((err, connection) => {
+      console.log("repo got hit")
+      if (err) {
+        return reject(new ConnectionError());
+      }
+      else{
+        connection.query(UPDATE_JOB_APPLICATION_REJECTED_STATUS, jobApplicationId, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve("Changed job application status to rejected");
+          }
+        });
+      }
+    });
+});
+
+module.exports = { createNewJobApplication, getUserJobApplicationsById,getBusinessJobApplications,getJobApplicationDetails,updateJobApplicationViewedStatus ,updateJobApplicationRejectedStatus};

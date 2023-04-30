@@ -1,4 +1,4 @@
-const { createNewJobApplication, getUserJobApplicationsById, getBusinessJobApplications } = require("../repo/jobApplicationRepo")
+const { createNewJobApplication, getUserJobApplicationsById, getBusinessJobApplications, getJobApplicationDetails, updateJobApplicationViewedStatus, updateJobApplicationRejectedStatus } = require("../repo/jobApplicationRepo")
 const uuid = require("uuid");
 
 const saveJobApplication = async (req,res) => {
@@ -40,4 +40,40 @@ const handleGetBusinessJobApplications = async(req,res) => {
         res.status(500).json(err)
     }
 }
-module.exports = {saveJobApplication,getUserJobApplications, handleGetBusinessJobApplications}
+
+const handleGetJobApplicationDetails = async(req,res) => {
+    const jobApplicationId = req.params.id;
+    try{
+        console.log("this is id", jobApplicationId)
+        const response = await getJobApplicationDetails(jobApplicationId);
+    
+        res.status(200).json(response);
+      
+    }catch(err){
+        console.log(err)
+        res.status(500).json(err)
+    }
+}
+const handleUpdateJobApplicationViewedStatus = async(req,res) => {
+    const jobApplicationId = req.params.id;
+    console.log("this is id", jobApplicationId)
+    try{
+       const response = await updateJobApplicationViewedStatus(jobApplicationId);
+        console.log(response)
+        res.status(200).json(response);  
+    }catch(err){
+        res.status(500).json(err)
+    }
+}
+
+const handleUpdateJobApplicationRejectedStatus = async(req,res) => {
+    const jobApplicationId = req.params.id;
+    try{
+        const response = await updateJobApplicationRejectedStatus(jobApplicationId);
+        console.log(response)
+        res.status(200).json(response);
+    }catch(err){
+        res.status(500).json(err)
+    }
+}
+module.exports = {saveJobApplication,getUserJobApplications, handleGetBusinessJobApplications,handleGetJobApplicationDetails,handleUpdateJobApplicationViewedStatus,handleUpdateJobApplicationRejectedStatus}
