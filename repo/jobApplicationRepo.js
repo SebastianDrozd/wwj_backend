@@ -7,6 +7,7 @@ const {
   GET_JOB_APPLICATION_DETAILS,
   UPDATE_JOB_APPLICATION_VIEWED_STATUS,
   UPDATE_JOB_APPLICATION_REJECTED_STATUS,
+  GET_SIMPLE_JOB_APPLICATION_DETAILS,
 } = require("../utils/queries/jobApplicationQueries");
 
 const createNewJobApplication = (jobApplication) => {
@@ -92,6 +93,23 @@ const getJobApplicationDetails = (jobApplicationId) => new Promise((resolve, rej
   });
 });
 
+const getSimpleJobApplicationDetails = (jobApplicationId) => new Promise((resolve, reject) => {
+  pool.getConnection((err, connection) => {
+    if (err) {
+      return reject(new ConnectionError());
+    }
+    else{
+      connection.query(GET_SIMPLE_JOB_APPLICATION_DETAILS, jobApplicationId, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    }
+  });
+});
+
 const updateJobApplicationViewedStatus = (jobApplicationId) => new Promise((resolve, reject) => {
   pool.getConnection((err, connection) => {
     console.log("repo got hit")
@@ -127,4 +145,4 @@ const updateJobApplicationRejectedStatus = (jobApplicationId) => new Promise((re
     });
 });
 
-module.exports = { createNewJobApplication, getUserJobApplicationsById,getBusinessJobApplications,getJobApplicationDetails,updateJobApplicationViewedStatus ,updateJobApplicationRejectedStatus};
+module.exports = { createNewJobApplication, getUserJobApplicationsById,getBusinessJobApplications,getJobApplicationDetails,updateJobApplicationViewedStatus ,updateJobApplicationRejectedStatus,getSimpleJobApplicationDetails};

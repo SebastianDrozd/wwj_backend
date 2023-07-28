@@ -46,7 +46,7 @@ const createJobPost = async (req,res) => {
         let jobPostCreatedResponse = await createNewJobPost(jobPost);
        // console.log("this is job post created response",jobPostCreatedResponse)
 
-        //lets save the each of the requirements in the database
+        //lets save  each of the requirements in the database
         const requirements = req.body.requirements;
         console.log("this is requirements",requirements)
         for(let i = 0; i < requirements.length; i++){
@@ -63,13 +63,7 @@ const createJobPost = async (req,res) => {
         
             
         }
-
-
-
-
         //now that we have the job post id, we can save the address
-
-
         address = {...address, job_address_id: uuid.v4(),job_post_id : jobPost.job_id}
         let addressString = `${address.job_street} ${address.job_city} ${address.job_state_province} ${address.job_postal_code} ${address.job_country}`
 

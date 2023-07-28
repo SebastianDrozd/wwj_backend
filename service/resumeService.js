@@ -1,5 +1,5 @@
 const uuid = require('uuid');
-const { saveResume, getUserResumes } = require('../repo/resumeRepo');
+const { saveResume, getUserResumes, deleteUserResume, editUserResume } = require('../repo/resumeRepo');
 
 
 
@@ -23,6 +23,7 @@ const handleGetUserResumes = async (req, res) => {
     console.log(user_id)
     try{
         const response = await getUserResumes(user_id);
+        console.log("resume deleted")
         res.status(200).json(response);
     }catch(error){
         console.log(error)
@@ -30,5 +31,30 @@ const handleGetUserResumes = async (req, res) => {
    
 }
 
+const handleDeleteUserResume = async (req, res) => {
+    const resumeId = req.params.id;
+    try{
+        const response = await deleteUserResume(resumeId);
+        res.status(200).json(response);
+       
+    }catch(error){
+        console.log(error)
+        res.send(error)
+    }
+};
 
-module.exports = {handleSaveResume,handleGetUserResumes}
+const handleEditUserResume = async (req, res) => {
+    const resumeId = req.params.id;
+    const newName = req.body.newName;
+    console.log(req.body)
+    try{
+        const response = await editUserResume(newName,resumeId);
+        res.status(200).json(response);
+    }catch(error){
+        console.log(error)
+        res.send(error)
+    }
+}
+
+
+module.exports = {handleSaveResume,handleGetUserResumes,handleDeleteUserResume,handleEditUserResume}

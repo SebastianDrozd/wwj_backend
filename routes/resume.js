@@ -1,5 +1,5 @@
 const express = require('express');
-const { handleSaveResume, handleGetUserResumes } = require('../service/resumeService');
+const { handleSaveResume, handleGetUserResumes, handleDeleteUserResume, handleEditUserResume } = require('../service/resumeService');
 const router = express.Router();
 const multer  = require('multer')
 const upload = multer({ dest: 'uploads/' })
@@ -17,8 +17,6 @@ router.get('/users/:id', (req, res) => {
 //@access   Private
 
 router.post('/',  upload.single('avatar'), (req, res) => {
-    console.log("endpoint hit")
-    //will upload a user's resume
     handleSaveResume(req, res);
     
 });
@@ -31,4 +29,19 @@ router.get('/:id/download', (req, res) => {
     //will download a user's resume
 });
 
+//@desc     Delete a user's resume
+//@route    Delete /api/v1/resumes/:id
+//@access   Private
+
+router.delete('/:id', (req, res) => {
+    handleDeleteUserResume(req,res);
+});
+
+//@desc     Edit a user's resume
+//@route    Put /api/v1/resumes/:id
+//@access   put
+
+router.put('/:id', (req, res) => {
+    handleEditUserResume(req,res);
+});
 module.exports = router;

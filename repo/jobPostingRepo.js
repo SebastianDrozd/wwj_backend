@@ -49,7 +49,8 @@ const getAllJobPostings = () => {
                 sql = `
                 Select * from jobPost
                 inner join business
-                on jobPost.job_business_id = business.id `;
+                on jobPost.job_business_id = business.id 
+                inner join business_address on business.id = business_address.business_id`;
                 connection.query(sql,(err,result) => {
                     connection.release();
                     if(err)
@@ -71,7 +72,9 @@ const getJobPostQuery = (searchTerm) => {
                 Select * from jobPost
                 inner join business
                 on jobPost.job_business_id = business.id
-                where job_title like '%${searchTerm}%' or job_description like '%${searchTerm}%'`;
+                inner join business_address on business.id = business_address.business_id
+                where job_title like '%${searchTerm}%' or job_description like '%${searchTerm}%'
+                `;
                 connection.query(sql,(err,result) => {
                     connection.release();
                     if(err)

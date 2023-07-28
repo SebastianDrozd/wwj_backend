@@ -47,6 +47,7 @@ router.get("/confirm/:confirmationToken", (req, res) => {
 })
 
 router.post("/login", (req, res) => {
+    console.log("route hit")
     const user = req.body;
     loginUser(user,res).then((result) => {
         console.log("sucessfully logged in")

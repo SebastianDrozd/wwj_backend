@@ -17,5 +17,9 @@ inner join business
 on user.user_id = business.business_user_id
 inner join business_address
 on business.id = business_address.business_id`
-const GET_REG_USER_PROFILE_INFO = `Select * from user where email = ?`
+const GET_REG_USER_PROFILE_INFO = 
+`Select * from user
+inner join phone_number on user.user_id = phone_number.ph_user_id
+inner join address on user.user_id = address.address_user_id
+ where email = ?`
 module.exports = {GET_REG_USER_PROFILE_INFO,GET_ALL_USERS,GET_USER_BY_EMAIL,CREATE_NEW_USER,UPDATE_USER_STATUS,GET_USER_BY_CONFIRMATION_CODE,GET_USER_BY_USERNAME,DELETE_USER_CONFIRMATION_CODE,GET_USER_BY_ID,SET_FRESH_TOKEN,DELETE_REFRESH_TOKEN,GET_USER_REFRESH_TOKEN,GET_JOB_POSTING_BY_BUSINESS_USER_ID,SET_ACCOUNT_SETUP_TO_TRUE,GET_COMPLETE_PROFILE}
